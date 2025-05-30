@@ -321,6 +321,9 @@ type ConnectionState struct {
 	// EncryptedExtensions message. It is only populated if the server sent the
 	// ech extension in EncryptedExtensions message.
 	ECHRetryConfigs []ECHConfig // [uTLS]
+
+	// SessionTicketsLens stores the lengths of all session tickets received immediately after the handshake.
+	SessionTicketsLens []int
 }
 
 // ExportKeyingMaterial returns length bytes of exported key material in a new

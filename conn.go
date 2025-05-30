@@ -124,6 +124,10 @@ type Conn struct {
 	activeCall atomic.Int32
 
 	tmp [16]byte
+
+	// sessionTicketsLens stores the lengths of all session tickets received immediately after the handshake.
+	// exported by ConnectionState.SessionTicketsLens
+	sessionTicketsLens []int
 }
 
 // Access to net.Conn methods.
@@ -1127,6 +1131,7 @@ func (c *Conn) unmarshalHandshakeMessage(data []byte, transcript transcriptHash)
 	case typeNewSessionTicket:
 		if c.vers == VersionTLS13 {
 			m = new(newSessionTicketMsgTLS13)
+			c.sessionTicketsLens = append(c.sessionTicketsLens, len(data))
 		} else {
 			m = new(newSessionTicketMsg)
 		}
@@ -1669,6 +1674,7 @@ func (c *Conn) connectionStateLocked() ConnectionState {
 	state.ECHAccepted = c.echAccepted
 	// [UTLS SECTION START]
 	c.utlsConnectionStateLocked(&state)
+	state.SessionTicketsLens = c.sessionTicketsLens
 	// [UTLS SECTION END]
 	return state
 }
